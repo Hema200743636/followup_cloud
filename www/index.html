@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b2a5b">
+<title>متابعة الخدمة</title>
+<style>
+:root{--bg:#f6f2e7;--card:#fff;--ink:#1c2433;--mut:#6b7280;--navy:#0b2a5b;--gold:#d4a63a;--ok:#1f8a4c;--bad:#c0392b;--line:#e5dfcc;--chip:#eef0f5}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1626;--card:#16223a;--ink:#eef1f7;--mut:#9aa6bd;--line:#26365a;--chip:#223256}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+header{background:var(--navy);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;position:sticky;top:0;z-index:5;border-bottom:3px solid var(--gold)}
+header h1{margin:0;font-size:1.15rem}
+main{padding:14px;max-width:720px;margin:0 auto}
+.tab{display:none}.tab.show{display:block}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav button{flex:1;border:0;background:none;color:var(--mut);padding:10px 2px;font:inherit;font-size:.78rem;border-top:3px solid transparent}
+nav button.on{color:var(--navy);font-weight:700;border-top-color:var(--gold)}
+@media(prefers-color-scheme:dark){nav button.on{color:var(--gold)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.nm{font-weight:700;font-size:1.05rem}
+.nm small{color:var(--mut);font-weight:400;margin-inline-start:16px;font-size:.85rem}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:11px 4px;font:inherit;font-size:.92rem}
+.chip.on{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+.datebar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.datebar .d{flex:1;text-align:center;font-weight:700}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;font:inherit}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.bad{color:var(--bad);border-color:var(--bad)}
+.btn.wide{width:100%;margin-top:8px}
+input,textarea,select{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin:4px 0 10px}
+label{font-size:.9rem;color:var(--mut)}
+.sum{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.8rem}
+.mut{color:var(--mut);font-size:.88rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:start}
+th{color:var(--mut);font-weight:600;font-size:.82rem}
+th small{font-weight:400}
+td.z{color:var(--bad);font-weight:700}
+td.g{color:var(--ok);font-weight:700}
+.scroll{overflow-x:auto}
+#sheetbg{position:fixed;inset:0;background:#0007;z-index:20;display:none;align-items:flex-end;justify-content:center}
+#sheetbg.show{display:flex}
+#sheet{background:var(--bg);width:100%;max-width:720px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+#sheet h3{margin:0 0 4px}
+.row{display:flex;gap:8px;margin-top:10px}.row .btn{flex:1}
+#toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:999px;font-size:.9rem;display:none;z-index:30}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+a{color:var(--navy)}@media(prefers-color-scheme:dark){a{color:var(--gold)}}
+
+body.student .tonly{display:none!important}
+.overlay{position:fixed;inset:0;background:var(--bg);z-index:40;display:none;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.overlay.show{display:flex}
+.overlay .box{width:100%;max-width:380px}
+.overlay h2{margin:0 0 6px;color:var(--navy)}
+@media(prefers-color-scheme:dark){.overlay h2{color:var(--gold)}}
+.err{color:var(--bad);min-height:1.4em;font-size:.92rem}
+</style>
+</head>
+<body>
+<header><h1 id="title">متابعة اليوم</h1></header>
+<main>
+  <section id="t-today" class="tab show">
+    <div class="datebar">
+      <button class="btn" onclick="shift(-1)" aria-label="اليوم السابق">›</button>
+      <div class="d" id="dateLabel"></div>
+      <button class="btn" onclick="shift(1)" aria-label="اليوم التالي">‹</button>
+    </div>
+    <div class="row" style="margin:0 0 10px"><button class="btn" onclick="goToday()">اليوم</button></div>
+    <div class="sum tonly" id="sum"></div>
+    <input class="tonly" id="q" type="search" placeholder="بحث باسم الطالب" oninput="renderToday()">
+    <div id="todayList"></div>
+  </section>
+
+  <section id="t-month" class="tab">
+    <div class="datebar">
+      <button class="btn" onclick="shiftM(-1)" aria-label="الشهر السابق">›</button>
+      <div class="d" id="monthLabel"></div>
+      <button class="btn" onclick="shiftM(1)" aria-label="الشهر التالي">‹</button>
+    </div>
+    <div class="row" style="margin:0 0 10px"><button class="btn" onclick="goMonth()">هذا الشهر</button></div>
+    <div class="sum tonly" id="sumM"></div>
+    <input class="tonly" id="q2" type="search" placeholder="بحث باسم الطالب" oninput="renderMonth()">
+    <div id="monthList"></div>
+  </section>
+
+  <section id="t-students" class="tab tonly">
+    <button class="btn pri wide" style="margin:0 0 12px" onclick="openAdd()">+ إضافة طلاب</button>
+    <div id="studentList"></div>
+  </section>
+
+  <section id="t-report" class="tab tonly">
+    <label for="range">فترة الصلاة وقراءة الكتاب المقدس</label>
+    <select id="range" onchange="renderReport()">
+      <option value="7">آخر ٧ أيام</option>
+      <option value="30" selected>آخر ٣٠ يوم</option>
+      <option value="month">هذا الشهر</option>
+      <option value="60">آخر ٦٠ يوم</option>
+    </select>
+    <div class="card scroll"><table id="reportTable"></table></div>
+    <button class="btn wide" onclick="shareReport()">مشاركة التقرير (واتساب وغيره)</button>
+    <p class="mut">الصلاة والقراءة: عدد الأيام. التناول والاعتراف: هل تم هذا الشهر (✓ أو ✗). الأحمر يعني لم يُسجَّل.</p>
+  </section>
+
+  <section id="t-account" class="tab">
+    <div class="card" id="acctInfo"></div>
+    <div class="card"><button class="btn bad wide" style="margin:0" onclick="logout()">تسجيل الخروج</button></div>
+    <p class="mut">البيانات تُحفظ على الإنترنت وتظهر للخادم. تعمل بدون إنترنت وتتزامن عند عودته. التطبيق يسجّل الاعتراف فقط «تم» أو «لم يتم».</p>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-t="today" onclick="go('today')">اليوم</button>
+  <button data-t="month" onclick="go('month')">الشهر</button>
+  <button class="tonly" data-t="students" onclick="go('students')">الطلاب</button>
+  <button class="tonly" data-t="report" onclick="go('report')">التقرير</button>
+  <button data-t="account" onclick="go('account')">حسابي</button>
+</nav>
+
+<div id="login" class="overlay">
+  <div class="box">
+    <h2>متابعة الخدمة</h2>
+    <p class="mut">سجّل الدخول باسم المستخدم والرمز الذي أعطاه لك الخادم.</p>
+    <label>اسم المستخدم (أو الإيميل للخادم)</label>
+    <input id="lu" autocapitalize="none" autocomplete="username" dir="ltr">
+    <label>الرمز / كلمة السر</label>
+    <input id="lp" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="err" id="lerr"></div>
+    <button class="btn pri wide" id="lbtn" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<div id="setup" class="overlay">
+  <div class="box">
+    <h2>الإعداد غير مكتمل</h2>
+    <p>لم يتم وضع إعدادات Firebase بعد. افتح الملف <b dir="ltr">www/config.js</b> على GitHub والصق بيانات مشروعك، ثم أعد بناء التطبيق.</p>
+  </div>
+</div>
+
+<div id="sheetbg" onclick="if(event.target===this)closeSheet()"><div id="sheet"></div></div>
+<div id="toast"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
