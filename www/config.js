@@ -6,3 +6,5 @@ window.FIREBASE_CONFIG = {
   messagingSenderId: "371310540987",
   appId: "1:371310540987:web:423f0afe9908ebf4d6519e"
 };
+// Old layout: one teacher, records stored at the top level (keeps all existing students and records).
+window.APP_MODE = "single";
